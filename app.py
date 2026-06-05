@@ -12,6 +12,8 @@ CATEGORIAS = [
     "Dízimo",
     "Oferta",
     "Rendimento Bancário",
+    "Deposito em Dinheiro",
+    "Cartão de Crédito"
     "Água",
     "Energia",
     "Limpeza",
@@ -63,6 +65,13 @@ def classificar(nome, valor, tipo):
     if tipo == "ENTRADA":
         if "RENTAB.INVEST" in nome or "INVEST FACIL" in nome:
             return "Rendimento Bancário"
+        if (
+            "DEP DINHEIRO" in nome
+            or "DEPOSITO" in nome
+            or "DEPOSITO" in nome
+            or "CAIXA AG" in nome 
+        ):
+            return "Deposito em Dinheiro"
 
         return "Dízimo" if valor > 100 else "Oferta"
 
@@ -92,6 +101,14 @@ def classificar(nome, valor, tipo):
 
     if "ALUGUEL" in nome:
         return "Aluguel"
+    
+    if (
+        "CARTÃO" in nome
+        or "CARTÃO" in nome
+        or "GASTOS CARTÃO" in nome
+        or "GASTOS CARTÃO" in nome
+    ):
+        return "Cartão de Crédito"
 
     return "Outros"
 
