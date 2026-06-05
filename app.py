@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
@@ -56,6 +57,23 @@ def rotulo_competencia(periodo):
     return f"{MESES[periodo.month]} de {periodo.year}"
 
 
+def arquivos_da_pasta():
+    pasta_app = Path(__file__).parent
+    arquivos = []
+
+    for caminho in sorted(pasta_app.glob("*.xls*")):
+        if caminho.name.startswith(".~lock"):
+            continue
+
+        arquivos.append(caminho)
+
+    return arquivos
+
+
+def nome_arquivo(arquivo):
+    return getattr(arquivo, "name", Path(arquivo).name)
+
+
 def classificar(nome, valor, tipo):
     nome = normalizar_texto(nome)
     tipo = normalizar_texto(tipo)
@@ -100,15 +118,32 @@ st.set_page_config(page_title="Financeiro Igreja", layout="wide")
 
 st.title("Financeiro Igreja")
 
-arquivos = st.file_uploader(
+arquivos_pasta = arquivos_da_pasta()
+
+arquivos_enviados = st.file_uploader(
     "Selecione os extratos do Bradesco",
     type=["xls", "xlsx"],
     accept_multiple_files=True,
 )
 
+arquivos = []
+nomes_adicionados = set()
+
+for arquivo in arquivos_pasta:
+    arquivos.append(arquivo)
+    nomes_adicionados.add(nome_arquivo(arquivo))
+
+for arquivo in arquivos_enviados:
+    if nome_arquivo(arquivo) not in nomes_adicionados:
+        arquivos.append(arquivo)
+        nomes_adicionados.add(nome_arquivo(arquivo))
+
 if not arquivos:
-    st.info("Envie um ou mais arquivos Excel do Bradesco para começar.")
+    st.info("Coloque os extratos na pasta do app ou envie um ou mais arquivos Excel do Bradesco.")
     st.stop()
+
+with st.expander("Extratos carregados", expanded=False):
+    st.write(pd.DataFrame({"Arquivo": [nome_arquivo(arquivo) for arquivo in arquivos]}))
 
 planilhas = []
 
@@ -116,7 +151,7 @@ for arquivo in arquivos:
     df = ler_excel_bradesco(arquivo)
 
     if not df.empty:
-        df["Arquivo"] = arquivo.name
+        df["Arquivo"] = nome_arquivo(arquivo)
         planilhas.append(df)
 
 if not planilhas:
