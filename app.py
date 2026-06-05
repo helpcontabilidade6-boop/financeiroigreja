@@ -212,6 +212,121 @@ fig = px.bar(
     title="Movimentações por Categoria",
 )
 st.plotly_chart(fig, use_container_width=True)
+from io import BytesIO
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle,
+)
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+
+
+def gerar_pdf():
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(buffer)
+
+    styles = getSampleStyleSheet()
+
+    elementos = []
+
+    elementos.append(
+        Paragraph("IGREJA GILEADE", styles["Title"])
+    )
+
+    elementos.append(
+        Paragraph(
+            "Relatório Financeiro",
+            styles["Heading2"],
+        )
+    )
+
+    elementos.append(Spacer(1, 12))
+
+    dados = [
+        ["Indicador", "Valor"],
+        ["Entradas", moeda(total_entradas)],
+        ["Dízimos", moeda(total_dizimos)],
+        ["Ofertas", moeda(total_ofertas)],
+        ["Saídas", moeda(total_saidas)],
+        ["Saldo", moeda(saldo)],
+    ]
+
+    tabela = Table(dados, colWidths=[180, 180])
+
+    tabela.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.darkblue),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ]
+        )
+    )
+
+    elementos.append(tabela)
+
+    elementos.append(Spacer(1, 20))
+
+    elementos.append(
+        Paragraph(
+            "Resumo por Categoria",
+            styles["Heading2"],
+        )
+    )
+
+    dados_resumo = [["Tipo", "Categoria", "Valor"]]
+
+    for _, linha in resumo.iterrows():
+        dados_resumo.append(
+            [
+                linha["Tipo"],
+                linha["Categoria"],
+                moeda(linha["Valor"]),
+            ]
+        )
+
+    tabela_resumo = Table(
+        dados_resumo,
+        colWidths=[100, 200, 100],
+    )
+
+    tabela_resumo.setStyle(
+        TableStyle(
+            [
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+            ]
+        )
+    )
+
+    elementos.append(tabela_resumo)
+
+    elementos.append(Spacer(1, 30))
+
+    elementos.append(
+        Paragraph(
+            "Tesouraria __________________________",
+            styles["Normal"],
+        )
+    )
+
+    elementos.append(
+        Paragraph(
+            "Pastor ______________________________",
+            styles["Normal"],
+        )
+    )
+
+    doc.build(elementos)
+
+    buffer.seek(0)
+
+    return buffer
 
 st.subheader("Movimentações")
 
@@ -235,4 +350,12 @@ st.download_button(
     csv,
     "financeiro_igreja.csv",
     "text/csv",
+)
+pdf = gerar_pdf()
+
+st.download_button(
+    "📄 Baixar Relatório PDF",
+    data=pdf,
+    file_name="Relatorio_Financeiro_Gileade.pdf",
+    mime="application/pdf",
 )

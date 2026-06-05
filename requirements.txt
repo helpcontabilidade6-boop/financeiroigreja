@@ -4,3 +4,4 @@ pdfplumber
 plotly
 openpyxl
 xlrd
+reportlab
