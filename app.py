@@ -135,24 +135,30 @@ df_final["_Competencia"] = df_final["_DataMovimento"].dt.to_period("M")
 competencias = sorted(df_final["_Competencia"].dropna().unique())
 
 if competencias:
-    competencia_padrao = df_final["_Competencia"].mode().iloc[0]
-    indice_padrao = competencias.index(competencia_padrao)
-    competencia = st.selectbox(
-        "Competência",
+
+    competencias_escolhidas = st.multiselect(
+        "Competências",
         competencias,
-        index=indice_padrao,
+        default=competencias,
         format_func=rotulo_competencia,
     )
 
-    total_antes_filtro = len(df_final)
-    df_final = df_final[df_final["_Competencia"] == competencia].copy()
-    linhas_ignoradas = total_antes_filtro - len(df_final)
+    if competencias_escolhidas:
+        df_final = df_final[
+            df_final["_Competencia"].isin(competencias_escolhidas)
+        ].copy()
 
-    if linhas_ignoradas:
-        st.caption(
-            f"{linhas_ignoradas} movimentação(ões) fora de {rotulo_competencia(competencia)} foram desconsideradas."
-        )
+# Remove registros repetidos entre extratos
+qtde_antes = len(df_final)
 
+df_final = df_final.drop_duplicates()
+
+qtde_removidas = qtde_antes - len(df_final)
+
+if qtde_removidas > 0:
+    st.warning(
+        f"⚠️ {qtde_removidas} movimentação(ões) duplicadas foram removidas."
+    )
 df_final["Categoria"] = df_final.apply(
     lambda linha: classificar(linha["Nome"], linha["Valor"], linha["Tipo"]),
     axis=1,
