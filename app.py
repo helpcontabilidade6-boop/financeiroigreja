@@ -136,17 +136,20 @@ competencias = sorted(df_final["_Competencia"].dropna().unique())
 
 if competencias:
 
-    competencias_escolhidas = st.multiselect(
-        "Competências",
-        competencias,
-        default=competencias,
-        format_func=rotulo_competencia,
+    competencia_principal = (
+        df_final["_Competencia"]
+        .value_counts()
+        .idxmax()
     )
 
-    if competencias_escolhidas:
-        df_final = df_final[
-            df_final["_Competencia"].isin(competencias_escolhidas)
-        ].copy()
+    df_final = df_final[
+        df_final["_Competencia"] == competencia_principal
+    ].copy()
+
+    st.info(
+        f"Competência identificada automaticamente: "
+        f"{rotulo_competencia(competencia_principal)}"
+    )
 
 # Remove registros repetidos entre extratos
 qtde_antes = len(df_final)
