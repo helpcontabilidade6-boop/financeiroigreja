@@ -105,7 +105,7 @@ def classificar(nome, valor, tipo):
     if (
         "CARTÃO" in nome
         or "CARTÃO" in nome
-        or "GASTOS CARTÃO" in nome
+        or "GASTOS CARTAO" in nome
         or "GASTOS CARTÃO" in nome
     ):
         return "Cartão de Crédito"
