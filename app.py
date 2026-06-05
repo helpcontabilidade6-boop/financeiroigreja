@@ -98,7 +98,24 @@ def classificar(nome, valor, tipo):
 
 st.set_page_config(page_title="Financeiro Igreja", layout="wide")
 
-st.title("Financeiro Igreja")
+st.markdown("""
+<div style='text-align:center;'>
+
+# ⛪ IGREJA GILEADE
+
+### Sistema Financeiro e Conciliação Bancária
+
+<p style='color:gray'>
+Controle de Entradas, Saídas, Dízimos e Ofertas
+</p>
+
+</div>
+
+<hr>
+""", unsafe_allow_html=True)
+st.caption(
+    "Prestação de contas, conciliação bancária e acompanhamento financeiro."
+)
 
 arquivos = st.file_uploader(
     "Selecione os extratos do Bradesco",
