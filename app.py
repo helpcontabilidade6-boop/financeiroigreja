@@ -11,7 +11,9 @@ from parser_bradesco import ler_excel_bradesco
 CATEGORIAS = [
     "Dízimo",
     "Oferta",
+    "Deposito em Dinheiro",
     "Rendimento Bancário",
+    "Cartão de Crédito",
     "Água",
     "Energia",
     "Limpeza",
@@ -61,10 +63,19 @@ def classificar(nome, valor, tipo):
     tipo = normalizar_texto(tipo)
 
     if tipo == "ENTRADA":
-        if "RENTAB.INVEST" in nome or "INVEST FACIL" in nome:
-            return "Rendimento Bancário"
 
-        return "Dízimo" if valor > 100 else "Oferta"
+       if "RENTAB.INVEST" in nome or "INVEST FACIL" in nome:
+        return "Rendimento Bancário"
+
+    if (
+        "DEP DINHEIRO" in nome
+        or "DEPOSITO" in nome
+        or "DEPÓSITO" in nome
+        or "CAIXA AG" in nome
+    ):
+        return "Depósito em Dinheiro"
+
+    return "Dízimo" if valor > 100 else "Oferta"
 
     if "WELLINGTON" in nome:
         return "Pastor"
