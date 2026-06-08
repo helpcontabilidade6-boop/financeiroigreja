@@ -6,6 +6,7 @@ import plotly.express as px
 import streamlit as st
 
 from parser_bradesco import ler_excel_bradesco
+from parser_txt import ler_livro_caixa_txt
 
 
 CATEGORIAS = [
@@ -13,7 +14,7 @@ CATEGORIAS = [
     "Oferta",
     "Rendimento Bancário",
     "Deposito em Dinheiro",
-    "Cartão de Crédito"
+    "Cartão de Crédito",
     "Água",
     "Energia",
     "Limpeza",
@@ -139,7 +140,10 @@ arquivos = st.file_uploader(
     type=["xls", "xlsx"],
     accept_multiple_files=True,
 )
-
+arquivo_txt = st.file_uploader(
+    "Livro Caixa (TXT)",
+    type=["txt"]
+)
 if not arquivos:
     st.info("Envie um ou mais arquivos Excel do Bradesco para começar.")
     st.stop()
@@ -152,7 +156,14 @@ for arquivo in arquivos:
     if not df.empty:
         df["Arquivo"] = arquivo.name
         planilhas.append(df)
+    # Processa livro caixa TXT
+if arquivo_txt:
+    df_txt = ler_livro_caixa_txt(arquivo_txt)
 
+    if not df_txt.empty:
+        df_txt["Arquivo"] = arquivo_txt.name
+        planilhas.append(df_txt) 
+    
 if not planilhas:
     st.error("Nenhuma movimentação foi encontrada nos arquivos enviados.")
     st.stop()
@@ -205,6 +216,7 @@ df_final["Categoria"] = df_final.apply(
     lambda linha: classificar(linha["Nome"], linha["Valor"], linha["Tipo"]),
     axis=1,
 )
+
 df_final = df_final.drop(columns=["_DataMovimento", "_Competencia"], errors="ignore")
 
 total_entradas = df_final.loc[df_final["Tipo"] == "Entrada", "Valor"].sum()
